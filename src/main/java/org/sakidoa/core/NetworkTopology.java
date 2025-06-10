@@ -1,4 +1,4 @@
-package org.sakidoa.networktopology;
+package org.sakidoa.core;
 
 public interface NetworkTopology {
     void configureNetwork(int numberOfNodes);
