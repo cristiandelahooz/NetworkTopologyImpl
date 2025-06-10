@@ -51,10 +51,4 @@ src/
          └── ... (tests)
 pom.xml
 ```
-
-- Modifica el valor de `-Dexec.mainClass` con el paquete y clase correctos si tu clase principal tiene otro nombre.
-- Personaliza este README según funcionalidades concretas de tu proyecto.
-
 ---
-
-¿Quieres que le agregue más secciones, como ejemplos de uso, contribución o contacto? ¿O necesitas que detecte automáticamente la clase principal?
