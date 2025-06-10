@@ -1,7 +1,7 @@
 package org.sakidoa.busnetwork;
 
 import org.sakidoa.core.Node;
-import org.sakidoa.networktopology.NetworkTopology;
+import org.sakidoa.core.NetworkTopology;
 
 import java.util.ArrayList;
 import java.util.List;
