@@ -1,5 +1,9 @@
 package org.sakidoa.core;
 
+import org.sakidoa.core.enums.MessageType;
+import org.sakidoa.core.enums.NodeEvent;
+import org.sakidoa.core.enums.NodeState;
+
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -10,24 +14,20 @@ public class Node implements Runnable {
     // Node identification and basic properties
     private final String nodeId;
     private final String nodeName;
-    private volatile boolean active;
     private final AtomicBoolean running = new AtomicBoolean(false);
-
     // Topology connections
     private final Set<Node> neighbors = Collections.synchronizedSet(new HashSet<>());
     private final Map<String, Object> nodeProperties = new ConcurrentHashMap<>();
-
     // Communication and messaging
     private final BlockingQueue<Message> messageQueue = new LinkedBlockingQueue<>();
     private final ExecutorService messageProcessor = Executors.newSingleThreadExecutor();
-
-    // Simulation/System state
-    private volatile long lastUpdateTime;
     private final AtomicLong processedMessages = new AtomicLong(0);
-    private volatile NodeState state = NodeState.IDLE;
-
     // Event listeners
     private final List<NodeEventListener> eventListeners = Collections.synchronizedList(new ArrayList<>());
+    private volatile boolean active;
+    // Simulation/System state
+    private volatile long lastUpdateTime;
+    private volatile NodeState state = NodeState.IDLE;
 
     public Node(String nodeId, String nodeName) {
         this.nodeId = Objects.requireNonNull(nodeId, "Node ID cannot be null");
@@ -95,21 +95,21 @@ public class Node implements Runnable {
      */
     private void handleMessage(Message message) {
         switch (message.getType()) {
-            case DATA:
-                processDataMessage(message);
-                break;
-            case CONTROL:
-                processControlMessage(message);
-                break;
-            case HEARTBEAT:
-                processHeartbeatMessage(message);
-                break;
-            case TOPOLOGY_UPDATE:
-                processTopologyUpdate(message);
-                break;
-            default:
-                // Handle unknown message types
-                handleUnknownMessage(message);
+        case DATA:
+            processDataMessage(message);
+            break;
+        case CONTROL:
+            processControlMessage(message);
+            break;
+        case HEARTBEAT:
+            processHeartbeatMessage(message);
+            break;
+        case TOPOLOGY_UPDATE:
+            processTopologyUpdate(message);
+            break;
+        default:
+            // Handle unknown message types
+            handleUnknownMessage(message);
         }
     }
 
@@ -160,11 +160,8 @@ public class Node implements Runnable {
      * Send a message to a specific neighbor
      */
     public boolean sendMessageToNeighbor(String neighborId, Message message) {
-        return neighbors.stream()
-                .filter(neighbor -> neighbor.getNodeId().equals(neighborId))
-                .findFirst()
-                .map(neighbor -> neighbor.sendMessage(message))
-                .orElse(false);
+        return neighbors.stream().filter(neighbor -> neighbor.getNodeId().equals(neighborId)).findFirst()
+                .map(neighbor -> neighbor.sendMessage(message)).orElse(false);
     }
 
     /**
@@ -234,17 +231,17 @@ public class Node implements Runnable {
         // Handle control messages
         String command = message.getPayload().toString();
         switch (command.toLowerCase()) {
-            case "stop":
-                shutdown();
-                break;
-            case "pause":
-                setState(NodeState.PAUSED);
-                break;
-            case "resume":
-                setState(NodeState.RUNNING);
-                break;
-            default:
-                onControlMessageReceived(message);
+        case "stop":
+            shutdown();
+            break;
+        case "pause":
+            setState(NodeState.PAUSED);
+            break;
+        case "resume":
+            setState(NodeState.RUNNING);
+            break;
+        default:
+            onControlMessageReceived(message);
         }
     }
 
@@ -355,17 +352,6 @@ public class Node implements Runnable {
     }
 
     /**
-     * State management
-     */
-    private void setState(NodeState newState) {
-        NodeState oldState = this.state;
-        this.state = newState;
-        if (oldState != newState) {
-            notifyListeners(NodeEvent.STATE_CHANGED);
-        }
-    }
-
-    /**
      * Property management
      */
     public void setProperty(String key, Object value) {
@@ -404,6 +390,17 @@ public class Node implements Runnable {
         return state;
     }
 
+    /**
+     * State management
+     */
+    private void setState(NodeState newState) {
+        NodeState oldState = this.state;
+        this.state = newState;
+        if (oldState != newState) {
+            notifyListeners(NodeEvent.STATE_CHANGED);
+        }
+    }
+
     public long getProcessedMessageCount() {
         return processedMessages.get();
     }
@@ -424,38 +421,9 @@ public class Node implements Runnable {
      * Status and diagnostic information
      */
     public NodeStatus getStatus() {
-        return new NodeStatus(
-                nodeId,
-                nodeName,
-                state,
-                active,
-                running.get(),
-                neighbors.size(),
-                messageQueue.size(),
-                processedMessages.get(),
-                lastUpdateTime
-        );
+        return new NodeStatus(nodeId, nodeName, state, active, running.get(), neighbors.size(), messageQueue.size(),
+                processedMessages.get(), lastUpdateTime);
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Node node = (Node) o;
-        return Objects.equals(nodeId, node.nodeId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(nodeId);
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Node{id='%s', name='%s', state=%s, neighbors=%d, queue=%d}",
-                nodeId, nodeName, state, neighbors.size(), messageQueue.size());
-    }
-
 
     public void receiveMessage(String message) {
         if (!active) {
@@ -476,84 +444,31 @@ public class Node implements Runnable {
             System.err.println("Interrupted while trying to receive message for node " + nodeId);
         }
     }
-    // Supporting classes and enums
 
-    public enum NodeState {
-        IDLE, RUNNING, BUSY, PAUSED, STOPPED, ERROR
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Node node = (Node) o;
+        return Objects.equals(nodeId, node.nodeId);
     }
 
-    public enum NodeEvent {
-        STARTED, STOPPED, SHUTDOWN_REQUESTED, STATE_CHANGED,
-        NEIGHBOR_ADDED, NEIGHBOR_REMOVED, ERROR
+    @Override
+    public int hashCode() {
+        return Objects.hash(nodeId);
     }
 
-    public enum MessageType {
-        DATA, CONTROL, HEARTBEAT, TOPOLOGY_UPDATE
-    }
-
-    public static class Message {
-        private final MessageType type;
-        private final String senderId;
-        private final Object payload;
-        private final long timestamp;
-
-        public Message(MessageType type, String senderId, Object payload, long timestamp) {
-            this.type = type;
-            this.senderId = senderId;
-            this.payload = payload;
-            this.timestamp = timestamp;
-        }
-
-        public Message(MessageType type, String senderId, Object payload) {
-            this(type, senderId, payload, System.currentTimeMillis());
-        }
-
-        // Getters
-        public MessageType getType() { return type; }
-        public String getSenderId() { return senderId; }
-        public Object getPayload() { return payload; }
-        public long getTimestamp() { return timestamp; }
-    }
-
-    public static class NodeStatus {
-        private final String nodeId;
-        private final String nodeName;
-        private final NodeState state;
-        private final boolean active;
-        private final boolean running;
-        private final int neighborCount;
-        private final int queueSize;
-        private final long processedMessages;
-        private final long lastUpdateTime;
-
-        public NodeStatus(String nodeId, String nodeName, NodeState state, boolean active,
-                          boolean running, int neighborCount, int queueSize,
-                          long processedMessages, long lastUpdateTime) {
-            this.nodeId = nodeId;
-            this.nodeName = nodeName;
-            this.state = state;
-            this.active = active;
-            this.running = running;
-            this.neighborCount = neighborCount;
-            this.queueSize = queueSize;
-            this.processedMessages = processedMessages;
-            this.lastUpdateTime = lastUpdateTime;
-        }
-
-        // Getters for all fields
-        public String getNodeId() { return nodeId; }
-        public String getNodeName() { return nodeName; }
-        public NodeState getState() { return state; }
-        public boolean isActive() { return active; }
-        public boolean isRunning() { return running; }
-        public int getNeighborCount() { return neighborCount; }
-        public int getQueueSize() { return queueSize; }
-        public long getProcessedMessages() { return processedMessages; }
-        public long getLastUpdateTime() { return lastUpdateTime; }
+    @Override
+    public String toString() {
+        return String.format("Node{id='%s', name='%s', state=%s, neighbors=%d, queue=%d}", nodeId, nodeName, state,
+                neighbors.size(), messageQueue.size());
     }
 
     @FunctionalInterface
     public interface NodeEventListener {
+
         void onNodeEvent(Node node, NodeEvent event);
     }
 }
