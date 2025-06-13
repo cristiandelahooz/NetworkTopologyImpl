@@ -149,6 +149,7 @@ public class Node implements Runnable {
         }
 
         try {
+            System.out.println(this.nodeId + " envió a " + message.getReceiverId() + ": " + message.getPayload());
             return messageQueue.offer(message, 1, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -160,6 +161,7 @@ public class Node implements Runnable {
      * Send a message to a specific neighbor
      */
     public boolean sendMessageToNeighbor(String neighborId, Message message) {
+
         return neighbors.stream().filter(neighbor -> neighbor.getNodeId().equals(neighborId)).findFirst()
                 .map(neighbor -> neighbor.sendMessage(message)).orElse(false);
     }
@@ -224,6 +226,7 @@ public class Node implements Runnable {
      */
     private void processDataMessage(Message message) {
         // Handle data messages - template method
+        System.out.println(this.nodeId + " recibió de " + message.getSenderId() + ": " + message.getPayload());
         onDataMessageReceived(message);
     }
 

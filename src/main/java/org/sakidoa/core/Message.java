@@ -7,6 +7,7 @@ public  class Message {
     private final String senderId;
     private final Object payload;
     private final long timestamp;
+    private String receiverId;
 
     public Message(MessageType type, String senderId, Object payload, long timestamp) {
         this.type = type;
@@ -25,4 +26,12 @@ public  class Message {
     public String getSenderId() { return senderId; }
     public Object getPayload() { return payload; }
     public long getTimestamp() { return timestamp; }
+
+    public String getReceiverId() {
+        return receiverId;
+    }
+
+    public void setReceiverId(String toId) {
+        this.receiverId = toId;
+    }
 }
