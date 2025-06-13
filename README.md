@@ -33,11 +33,6 @@ Puedes ejecutar la aplicación principal (ajusta el nombre de la clase principal
 mvn exec:java -Dexec.mainClass="org.sakidoa.Main"
 ```
 
-O ejecuta el JAR directamente si tu proyecto genera uno ejecutable:
-
-```bash
-java -jar target/NetworkTopologyImpl-1.0-SNAPSHOT.jar
-```
 
 ## Estructura del proyecto
 
