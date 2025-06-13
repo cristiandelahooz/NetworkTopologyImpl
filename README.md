@@ -54,4 +54,4 @@ Durante el desarrollo de este simulador de topologías de red, pude comprender l
 
 Cada topología ofrece ventajas específicas: Ring para simplicidad, Bus para comunicación directa, HyperCube para eficiencia en redes grandes, y Tree para organización jerárquica. Durante el desarrollo, utilicé inteligencia artificial para comprender conceptos complejos como la implementación del algoritmo de conectividad del HyperCube usando operaciones XOR, y para generar el sistema de colores en la consola que mejora la experiencia visual del menú y los mensajes de estado del simulador.
 
--- Lo que mas me encantó fue HyperCube, dado que cualquier nodo en un cluster de 2^n nodos es alcanzable en n o menos pasos, fue increible ver un aplicativo tan práctico de calculos binarios com XOR.
+-- Lo que más me encantó fue HyperCube, dado que cualquier nodo en un cluster de 2^n nodos es alcanzable en n o menos pasos, fue increible ver un aplicativo tan práctico de calculos binarios com XOR.
